@@ -1,0 +1,40 @@
+{
+    "key": {
+        "available": 2,
+        "in_use": 1,
+        "maintenance": 1,
+        "total": 5
+    },
+    "key_status":{
+        "Robotronics": "available",
+        "KP": "in_use",
+        "STAC": "available",
+        "E-Cell": "maintenance",
+        "Yantrik": "available"
+    },
+    "recent_activity": [
+        {
+            "user": "Japneet",
+            "action": "returned",
+            "location": "Robotronics",
+            "method": "NFC Card",
+            "time": "1 hour ago"
+        },
+        {
+            "user": "Kartavya",
+            "action": "took",
+            "location": "KP",
+            "method": "Phone NFC",
+            "time": "1 hour ago"
+        },
+        {
+            "user": "Noor",
+            "action": "requested",
+            "location": "Robotronics",
+            "method": "Pending",
+            "time": "2 hours ago"
+        }
+    
+  ]
+
+}

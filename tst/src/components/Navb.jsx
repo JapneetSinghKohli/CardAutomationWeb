@@ -28,14 +28,14 @@ export default function Navbar() {
               <button className="hover:text-blue-600 hover:cursor-pointer">Access</button>
               {dropdownOpen && (
                 <div className="absolute left-[-50px] mt-0 w-45 bg-white shadow-lg rounded-md p-2">
-                  <a href="#" className="block px-4 py-2 hover:text-blue-600 hover:cursor-pointer hover:bg-gray-100">Access Logs</a>
-                  <a href="#" className="block px-4 py-2 hover:text-blue-600 hover:cursor-pointer hover:bg-gray-100">Access Requests</a>
+                  <a href="#" className="block px-4 py-2 hover:text-blue-600 border-b-1 border-b-gray-200 hover:cursor-pointer hover:bg-gray-100">Access Logs</a>
+                  <a href="#" className="block px-4 py-2 hover:text-blue-600 border-b-1 border-b-gray-200 hover:cursor-pointer hover:bg-gray-100">Access Requests</a>
                   <a href="#" className="block px-4 py-2 hover:text-blue-600 hover:cursor-pointer hover:bg-gray-100">NFC Access</a>
                 </div>
               )}
             </div>
 
-            <NavLink to="/members" href="#" className="hover:text-blue-600">Members</NavLink>
+            <NavLink to="/members" className="hover:text-blue-600">Members</NavLink>
             <a href="#" className="hover:text-blue-600">Settings</a>
           </div>
 
@@ -59,28 +59,28 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden px-4 pb-4 space-y-2">
-          <a href="#" className="block hover:text-blue-600">Dashboard</a>
-          <a href="#" className="block hover:text-blue-600">Key Management</a>
+          <NavLink to="/" href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Dashboard</NavLink>
+          <a href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Key Management</a>
           
           {/* Dropdown (clickable for mobile) */}
           <div>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-full text-left hover:text-blue-600"
+              className="w-full border-b-1 border-b-gray-400 text-left hover:text-blue-600"
             >
               Access
             </button>
             {dropdownOpen && (
               <div className="ml-4 space-y-1">
-                <a href="#" className="block hover:text-blue-600">Access Logs</a>
-                <a href="#" className="block hover:text-blue-600">Access Requests</a>
+                <a href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Access Logs</a>
+                <a href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Access Requests</a>
                 <a href="#" className="block hover:text-blue-600">NFC Access</a>
               </div>
             )}
           </div>
 
-          <a href="#" className="block hover:text-blue-600">Members</a>
-          <a href="#" className="block hover:text-blue-600">Settings</a>
+          <NavLink to="/members" href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Members</NavLink>
+          <a href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Settings</a>
 
           <div className="pt-2 flex space-x-4">
             <button className="hover:text-blue-600 border-blue-600 border-2 px-4 py-2 rounded-md">Log in</button>

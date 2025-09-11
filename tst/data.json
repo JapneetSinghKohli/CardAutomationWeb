@@ -35,6 +35,28 @@
             "time": "2 hours ago"
         }
     
-  ]
-
+    ],
+    "robo_club_members": [
+        {
+            "name": "Japneet",
+            "role": "Member",
+            "email": "email1",
+            "active": true,
+            "Joined": "2022"
+        },
+        {
+            "name": "Akshadeep",
+            "role": "Coordinator",
+            "email": "email2",
+            "active": true,
+            "Joined": "2021"
+        },
+        {
+            "name": "Piyush Roy",
+            "role": "Mentor",
+            "email": "email3",
+            "active": false,
+            "Joined": "2019"
+        }
+    ]
 }

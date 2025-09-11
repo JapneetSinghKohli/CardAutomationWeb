@@ -1,124 +1,95 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { Squash as Hamburger } from 'hamburger-react'
+import {Link,Navlink} from "react-router-dom";
 
-import { Button, Grid, Menu, Space, theme } from "antd";
-
-import { MenuOutlined } from "@ant-design/icons";
-
-// You can find the code for the Logo here: https://www.antblocksui.com/blocks/navbars
-
-const { useToken } = theme;
-const { useBreakpoint } = Grid;
-
-export default function Navb() {
-  const { token } = useToken();
-  const screens = useBreakpoint();
-
-  const menuItems = [
-    {
-      label: "Dashboard",
-      key: "dashboard",
-    },
-    {
-      label: "Key Management",
-      key: "key",
-    },
-    {
-      label: "Access ",
-      key: "access",
-      children: [
-        {
-          label: "Access Logs",
-          key: "logs",
-        },
-        {
-          label: "Access Requests",
-          key: "requests",
-        },
-        {
-          label: "NFC Access",
-          key: "nfc",
-        },
-      ],
-    },
-    
-    {
-      label: "Members",
-      key: "members",
-    },
-    
-    {
-      label: "Settings",
-      key: "alipay",
-    },
-  ];
-
-  const [current, setCurrent] = useState("projects");
-  const onClick = (e) => {
-    console.log("click ", e);
-    setCurrent(e.key);
-  };
-
-  const styles = {
-    container: {
-      alignItems: "center",
-      display: "flex",
-      justifyContent: "space-between",
-      margin: "0 auto",
-      maxWidth: token.screenXL,
-      padding: screens.md ? `0px ${token.paddingLG}px` : `0px ${token.padding}px`
-    },
-    header: {
-      backgroundColor: token.colorBgContainer,
-      borderBottom: `${token.lineWidth}px ${token.lineType} ${token.colorSplit}`,
-      position: "relative"
-    },
-    logo: {
-      display: "block",
-      height: token.sizeLG,
-      left: "50%",
-      position: screens.md ? "static" : "absolute",
-      top: "50%",
-      transform: screens.md ? " " : "translate(-50%, -50%)"
-    },
-    menu: {
-      backgroundColor: "transparent",
-      borderBottom: "none",
-      lineHeight: screens.sm ? "4rem" : "3.5rem",
-      marginLeft: screens.md ? "0px" : `-${token.size}px`,
-      width: screens.md ? "inherit" : token.sizeXXL
-    },
-    menuContainer: {
-      alignItems: "center",
-      display: "flex",
-      gap: token.size,
-      width: "100%"
-    }
-  };
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <nav style={styles.header}>
-      <div style={styles.container}>
-        <div style={styles.menuContainer}>
-          <a style={styles.logo} href="#">
-          {/* <Logo showText={true} /> */}
-          Logo
-          </a>
-          <Menu
-            style={styles.menu}
-            mode="horizontal"
-            items={menuItems}
-            onClick={onClick}
-            selectedKeys={screens.md ? [current] : ""}
-            overflowedIndicator={
-              <Button type="text" icon={<MenuOutlined />}></Button>
-            }
-          />
+    <nav className="bg-white border-b-1 shadow-sm">
+      <div className="md:w-full  mx-auto px-4 md:px-6 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16 items-center">
+          
+          {/* Logo */}
+          <div className=" w-20 pl-0 flex-shrink-0 text-lg font-bold">Logo</div>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex space-x-6 items-center">
+            <a href="#" className="hover:text-blue-600">Dashboard</a>
+            <a href="#" className="hover:text-blue-600">Key Management</a>
+
+            {/* Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setDropdownOpen(true)}
+              onMouseLeave={() => setDropdownOpen(false)}
+            >
+              <button className="hover:text-blue-600 hover:cursor-pointer">Access</button>
+              {dropdownOpen && (
+                <div className="absolute left-[-50px] mt-0 w-45 bg-white shadow-lg rounded-md p-2">
+                  <a href="#" className="block px-4 py-2 hover:text-blue-600 hover:cursor-pointer hover:bg-gray-100">Access Logs</a>
+                  <a href="#" className="block px-4 py-2 hover:text-blue-600 hover:cursor-pointer hover:bg-gray-100">Access Requests</a>
+                  <a href="#" className="block px-4 py-2 hover:text-blue-600 hover:cursor-pointer hover:bg-gray-100">NFC Access</a>
+                </div>
+              )}
+            </div>
+
+            <a href="#" className="hover:text-blue-600">Members</a>
+            <a href="#" className="hover:text-blue-600">Settings</a>
+          </div>
+
+          {/* Right: Auth buttons */}
+          <div className="hidden md:flex space-x-4">
+            <button className="hover:text-blue-600">Log in</button>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+              Sign up
+            </button>
+          </div>
+
+          {/* Mobile Hamburger */}
+          <div className="md:hidden flex items-center">
+            <button onClick={() => setIsOpen(!isOpen)}>
+             <Hamburger size={24} toggled={isOpen} toggle={setIsOpen} />
+            </button>
+          </div>
         </div>
-        <Space>
-          {screens.md ? <Button type="text">Log in</Button> : ""}
-          <Button type="primary">Sign up</Button>
-        </Space>
       </div>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden px-4 pb-4 space-y-2">
+          <a href="#" className="block hover:text-blue-600">Dashboard</a>
+          <a href="#" className="block hover:text-blue-600">Key Management</a>
+          
+          {/* Dropdown (clickable for mobile) */}
+          <div>
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="w-full text-left hover:text-blue-600"
+            >
+              Access
+            </button>
+            {dropdownOpen && (
+              <div className="ml-4 space-y-1">
+                <a href="#" className="block hover:text-blue-600">Access Logs</a>
+                <a href="#" className="block hover:text-blue-600">Access Requests</a>
+                <a href="#" className="block hover:text-blue-600">NFC Access</a>
+              </div>
+            )}
+          </div>
+
+          <a href="#" className="block hover:text-blue-600">Members</a>
+          <a href="#" className="block hover:text-blue-600">Settings</a>
+
+          <div className="pt-2 flex space-x-4">
+            <button className="hover:text-blue-600 border-blue-600 border-2 px-4 py-2 rounded-md">Log in</button>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+              Sign up
+            </button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

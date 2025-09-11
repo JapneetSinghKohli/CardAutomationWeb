@@ -1,0 +1,81 @@
+{
+  "summary": {
+    "total": 8,
+    "today": 0,
+    "taken": 3,
+    "returned": 2
+  },
+  "logs": [
+    {
+      "id": 1,
+      "user": "John Smith",
+      "status": "Returned",
+      "location": "Main Entrance",
+      "method": "NFC Card",
+      "timestamp": "2025-01-22T22:15:00",
+      "details": "Event cleanup completed",
+      "duration": "3h",
+      "ago": "598d ago"
+    },
+    {
+      "id": 2,
+      "user": "Sarah Wilson",
+      "status": "Taken",
+      "location": "Gymnasium",
+      "method": "NFC Phone",
+      "timestamp": "2025-01-22T20:00:00",
+      "details": "",
+      "ago": "598d ago"
+    },
+    {
+      "id": 3,
+      "user": "Mike Johnson",
+      "status": "Requested",
+      "location": "Storage Room",
+      "method": "System",
+      "timestamp": "2025-01-22T17:45:00",
+      "details": "Equipment retrieval for practice",
+      "ago": "598d ago"
+    },
+    {
+      "id": 4,
+      "user": "John Smith",
+      "status": "Taken",
+      "location": "Main Entrance",
+      "method": "NFC Card",
+      "timestamp": "2025-01-22T19:15:00",
+      "details": "",
+      "ago": "598d ago"
+    },
+    {
+      "id": 5,
+      "user": "Lisa Davis",
+      "status": "Approved",
+      "location": "Club Office",
+      "method": "System",
+      "timestamp": "2025-01-22T17:00:00",
+      "details": "Administrative access approved by coordinator",
+      "ago": "598d ago"
+    },
+    {
+      "id": 6,
+      "user": "Alex Brown",
+      "status": "Denied",
+      "location": "Gymnasium",
+      "method": "System",
+      "timestamp": "2025-01-22T15:30:00",
+      "details": "Insufficient privileges for requested time slot",
+      "ago": "598d ago"
+    },
+    {
+      "id": 7,
+      "user": "Sarah Wilson",
+      "status": "Returned",
+      "location": "Storage Room",
+      "method": "System",
+      "timestamp": "2025-01-22T14:45:00",
+      "details": "",
+      "ago": "598d ago"
+    }
+  ]
+}

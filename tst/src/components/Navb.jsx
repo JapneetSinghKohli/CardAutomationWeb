@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Squash as Hamburger } from 'hamburger-react'
-import {Link,Navlink} from "react-router-dom";
+import {Link,NavLink} from "react-router-dom";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,7 +16,7 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-6 items-center">
-            <a href="#" className="hover:text-blue-600">Dashboard</a>
+            <NavLink to="/" href="#" className="hover:text-blue-600">Dashboard</NavLink>
             <a href="#" className="hover:text-blue-600">Key Management</a>
 
             {/* Dropdown */}
@@ -35,7 +35,7 @@ export default function Navbar() {
               )}
             </div>
 
-            <a href="#" className="hover:text-blue-600">Members</a>
+            <NavLink to="/members" href="#" className="hover:text-blue-600">Members</NavLink>
             <a href="#" className="hover:text-blue-600">Settings</a>
           </div>
 

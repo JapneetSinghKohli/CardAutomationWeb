@@ -55,8 +55,29 @@
             "name": "Piyush Roy",
             "role": "Mentor",
             "email": "email3",
-            "active": false,
+            "active": true,
             "Joined": "2019"
+        },
+        {
+            "name": "Noor",
+            "role": "Member",
+            "email": "email4",
+            "active": false,
+            "Joined": "2022"
+        },
+        {
+            "name": "Kartavya",
+            "role": "Member",
+            "email": "email5",
+            "active": true,
+            "Joined": "2023"
+        },
+        {
+            "name": "Aman",
+            "role": "Member",
+            "email": "email6",
+            "active": false,
+            "Joined": "2021"
         }
     ]
 }

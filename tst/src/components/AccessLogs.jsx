@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { IconSearch, } from "@tabler/icons-react";
 
+import { useNavigate } from "react-router-dom";
+
+
+import { motion, AnimatePresence } from "framer-motion";
+
 function StatusBadge({ status }) {
   const colors = {
     Returned: "bg-green-100 text-green-700",
     Taken: "bg-blue-100 text-blue-700",
-    Requested: "bg-yellow-100 text-yellow-700",
+    Requested: "bg-yellow-100 text-yellow-700 cursor-pointer",
     Approved: "bg-teal-100 text-teal-700",
     Denied: "bg-red-100 text-red-700",
   };
@@ -24,6 +29,8 @@ function StatusBadge({ status }) {
 export default function AccessLogs() {
   const [data, setData] = useState(null);
   const [query, setQuery] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const [selectedLog, setSelectedLog] = useState(null); // 🔹 for modal
 
   useEffect(() => {
     fetch("/logs.json")
@@ -40,8 +47,10 @@ export default function AccessLogs() {
       log.location.toLowerCase().includes(query.toLowerCase())
   );
 
+  const logsToShow = showAll ? filteredLogs : filteredLogs.slice(0, 5);
+
   return (
-    <div className="p-6">
+    <div className="p-6 relative">
       {/* Summary */}
       <h1 className="text-2xl font-bold mb-6">Logs</h1>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -79,11 +88,21 @@ export default function AccessLogs() {
 
       {/* Logs */}
       <div className="bg-white rounded-lg shadow-sm border divide-y">
-        {filteredLogs.length === 0 ? (
+        {logsToShow.length === 0 ? (
           <p className="p-4 text-gray-500">No logs found</p>
         ) : (
-          filteredLogs.map((log) => (
-            <div key={log.id} className="p-4 flex justify-between items-center">
+          logsToShow.map((log) => (
+            <div
+              key={log.id}
+              className={`p-4 flex justify-between items-center ${
+                log.status === "Requested" ? "cursor-pointer hover:bg-gray-50" : ""
+              }`}
+              onClick={() => {
+                if (log.status === "Requested") {
+                  setSelectedLog(log); // 🔹 open modal
+                }
+              }}
+            >
               <div>
                 <p className="font-semibold text-gray-800 flex items-center gap-2">
                   {log.user}
@@ -102,6 +121,71 @@ export default function AccessLogs() {
           ))
         )}
       </div>
+
+      {/* View More */}
+      {filteredLogs.length > 5 && (
+        <div className="text-center mt-4">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="text-blue-600 font-medium hover:underline"
+          >
+            {showAll ? "View Less" : "View More"}
+          </button>
+        </div>
+      )}
+
+      {/* 🔹 Modal Popup for Requested */}
+      <AnimatePresence>
+        {selectedLog && (
+          <motion.div
+            className="fixed inset-0 backdrop-blur-1xl bg-opacity-40 flex justify-center items-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+            >
+              <h2 className="text-xl font-bold mb-4">Access Request</h2>
+              <p className="font-semibold">{selectedLog.user}</p>
+              <p className="text-gray-600">{selectedLog.location}</p>
+              <p className="text-sm text-gray-500 mt-2">
+                {selectedLog.method} •{" "}
+                {new Date(selectedLog.timestamp).toLocaleString()}
+              </p>
+              {selectedLog.details && (
+                <p className="text-gray-500 mt-2">{selectedLog.details}</p>
+              )}
+
+              {/* Actions */}
+              <div className="mt-6 flex gap-4">
+                <button
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                  onClick={() => alert("Approved")}
+                >
+                  Approve
+                </button>
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                  onClick={() => alert("Denied")}
+                >
+                  Deny
+                </button>
+                <button
+                  className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
+                  onClick={() => setSelectedLog(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

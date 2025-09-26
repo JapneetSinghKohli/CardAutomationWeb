@@ -5,15 +5,17 @@ import Dashboard from './components/dashboard'
 import KeyManagement from './components/KeyManagement'
 import AccessLogs from './components/AccessLogs'
 
-function App() {
-  const [count, setCount] = useState(0)
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+import AccessRequests from "./components/AccessRequests";
+
+export default function App() {
   return (
-    <>
-      <Navb/>
-      <AccessLogs/>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<AccessLogs />} />
+        <Route path="/access-requests" element={<AccessRequests />} />
+      </Routes>
+    </Router>
+  );
 }
-
-export default App

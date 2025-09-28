@@ -10,7 +10,7 @@ export default function MembersAccessLogs() {
   const currentUser = "john_doe";
 
   useEffect(() => {
-    fetch("/logs.json")
+    fetch("/data.json")
       .then((res) => res.json())
       .then((json) => setData(json));
   }, []);

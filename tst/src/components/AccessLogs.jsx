@@ -33,7 +33,7 @@ export default function AccessLogs() {
   const [selectedLog, setSelectedLog] = useState(null); // 🔹 for modal
 
   useEffect(() => {
-    fetch("/logs.json")
+    fetch("/data.json")
       .then((res) => res.json())
       .then((json) => setData(json));
   }, []);
@@ -87,19 +87,16 @@ export default function AccessLogs() {
       </div>
 
       {/* Logs */}
-      <div className="bg-white rounded-lg shadow-sm border divide-y">
-        {logsToShow.length === 0 ? (
-          <p className="p-4 text-gray-500">No logs found</p>
-        ) : (
-          logsToShow.map((log) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {logsToShow.map((log) => (
             <div
               key={log.id}
-              className={`p-4 flex justify-between items-center ${
+              className={`p-4 rounded-lg border shadow-sm bg-white flex flex-col justify-between h-40 ${
                 log.status === "Requested" ? "cursor-pointer hover:bg-gray-50" : ""
               }`}
               onClick={() => {
                 if (log.status === "Requested") {
-                  setSelectedLog(log); // 🔹 open modal
+                  setSelectedLog(log);
                 }
               }}
             >
@@ -116,10 +113,9 @@ export default function AccessLogs() {
                   <p className="text-xs text-gray-400 mt-1">{log.details}</p>
                 )}
               </div>
-              <div className="text-xs text-gray-400">{log.ago}</div>
+              <div className="text-xs text-gray-400 text-right">{log.ago}</div>
             </div>
-          ))
-        )}
+          ))}
       </div>
 
       {/* View More */}

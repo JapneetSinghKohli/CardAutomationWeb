@@ -89,7 +89,7 @@ export default function KeyManagement() {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    fetch("/keydata.json")
+    fetch("/data.json")
       .then((res) => res.json())
       .then((json) => setData(json));
   }, []);

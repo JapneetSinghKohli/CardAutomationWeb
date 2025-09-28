@@ -1,6 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// StatusBadge component
+function StatusBadge({ status }) {
+  const colors = {
+    Returned: "bg-green-100 text-green-700",
+    Taken: "bg-blue-100 text-blue-700",
+    Requested: "bg-yellow-100 text-yellow-700",
+    Approved: "bg-teal-100 text-teal-700",
+    Denied: "bg-red-100 text-red-700",
+  };
+
+  return (
+    <span
+      className={`px-2 py-1 text-xs font-medium rounded-full ${
+        colors[status] || "bg-gray-100 text-gray-600"
+      }`}
+    >
+      {status}
+    </span>
+  );
+}
+
 export default function MembersAccessLogs() {
   const [data, setData] = useState(null);
   const [selectedLog, setSelectedLog] = useState(null);
@@ -17,27 +38,86 @@ export default function MembersAccessLogs() {
 
   if (!data) return <p className="p-6">Loading...</p>;
 
-  // show only this member’s logs
-  const memberLogs = data.logs.filter((log) => log.user === currentUser);
+  // Separate logs for this member
+  const accessHistory = data.logs.filter(
+    (log) => log.user === currentUser && log.status !== "Requested"
+  );
+  const requestStatus = data.logs.filter(
+    (log) => log.user === currentUser && log.status === "Requested"
+  );
 
   return (
-    <div className="p-6 relative">
-      <h1 className="text-2xl font-bold mb-6">My Access History</h1>
 
-      {/* Logs */}
-      <div className="bg-white rounded-lg shadow-sm border divide-y">
-        {memberLogs.length === 0 ? (
-          <p className="p-4 text-gray-500">No logs found</p>
-        ) : (
-          memberLogs.map((log) => (
-            <div key={log.id} className="p-4">
-              <p className="font-semibold text-gray-800">{log.location}</p>
-              <p className="text-sm text-gray-500">
-                {log.method} • {new Date(log.timestamp).toLocaleString()}
-              </p>
-            </div>
-          ))
-        )}
+    
+
+    <div className="p-6 relative">
+      <h1 className="text-2xl font-bold mb-6">Logs</h1>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="rounded-lg bg-white p-4 shadow-sm border">
+          <h3 className="text-sm font-medium text-gray-600">Total Activities</h3>
+          <p className="mt-2 text-2xl font-bold">{data.summary.total}</p>
+        </div>
+        <div className="rounded-lg bg-white p-4 shadow-sm border">
+          <h3 className="text-sm font-medium text-gray-600">Today</h3>
+          <p className="mt-2 text-2xl font-bold">{data.summary.today}</p>
+        </div>
+        <div className="rounded-lg bg-white p-4 shadow-sm border">
+          <h3 className="text-sm font-medium text-gray-600">Keys Taken</h3>
+          <p className="mt-2 text-2xl font-bold text-red-600">{data.summary.taken}</p>
+        </div>
+        <div className="rounded-lg bg-white p-4 shadow-sm border">
+          <h3 className="text-sm font-medium text-gray-600">Keys Returned</h3>
+          <p className="mt-2 text-2xl font-bold text-green-600">{data.summary.returned}</p>
+        </div>
+      </div>
+      {/* Page Title */}
+      <h1 className="text-2xl font-bold mb-6">My Access</h1>
+
+      {/* Side by side tables */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Access History Table */}
+        <div className="flex-1 bg-white rounded-lg shadow-sm border divide-y">
+          <h2 className="p-4 font-semibold text-gray-800 border-b">Access History</h2>
+          {accessHistory.length === 0 ? (
+            <p className="p-4 text-gray-500">No history found</p>
+          ) : (
+            accessHistory.map((log) => (
+              <div key={log.id} className="p-4 flex justify-between items-center">
+                <div>
+                  <p className="font-semibold text-gray-800">{log.location}</p>
+                  <p className="text-sm text-gray-500">
+                    {log.method} • {new Date(log.timestamp).toLocaleString()}
+                  </p>
+                </div>
+                <span className="ml-4">
+                  <StatusBadge status={log.status} />
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Request Status Table */}
+        <div className="flex-1 bg-white rounded-lg shadow-sm border divide-y">
+          <h2 className="p-4 font-semibold text-gray-800 border-b">Request Status</h2>
+          {requestStatus.length === 0 ? (
+            <p className="p-4 text-gray-500">No requests found</p>
+          ) : (
+            requestStatus.map((log) => (
+              <div key={log.id} className="p-4 flex justify-between items-center">
+                <div>
+                  <p className="font-semibold text-gray-800">{log.location}</p>
+                  <p className="text-sm text-gray-500">
+                    {log.method} • {new Date(log.timestamp).toLocaleString()}
+                  </p>
+                </div>
+                <span className="ml-4">
+                  <StatusBadge status={log.status} />
+                </span>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       {/* Request button */}
@@ -68,9 +148,7 @@ export default function MembersAccessLogs() {
               <h2 className="text-xl font-bold mb-4">New Access Request</h2>
 
               {/* Time dropdown */}
-              <label className="block mb-2 text-sm font-medium">
-                Select Time
-              </label>
+              <label className="block mb-2 text-sm font-medium">Select Time</label>
               <select className="w-full border rounded-lg p-2 mb-4">
                 <option>09:00 - 10:00</option>
                 <option>10:00 - 11:00</option>
@@ -80,9 +158,7 @@ export default function MembersAccessLogs() {
               </select>
 
               {/* Reason */}
-              <label className="block mb-2 text-sm font-medium">
-                Reason
-              </label>
+              <label className="block mb-2 text-sm font-medium">Reason</label>
               <textarea
                 className="w-full border rounded-lg p-2 mb-4"
                 rows="3"

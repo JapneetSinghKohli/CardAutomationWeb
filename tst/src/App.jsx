@@ -8,7 +8,7 @@ import MembersAccessLogs from './components/MembersAccessLog'
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import AccessRequests from "./components/AccessRequests";
+
 
 
 
@@ -17,7 +17,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<AccessLogs />} />
-        <Route path="/access-requests" element={<AccessRequests />} />
+        <Route path="/keys" element={<KeyManagement />} />
         <Route path="/members" element={<MembersAccessLogs />} /> {/* 👈 new route */}
       </Routes>
     </Router>

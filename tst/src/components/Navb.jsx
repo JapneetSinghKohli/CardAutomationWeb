@@ -1,23 +1,27 @@
 import { useState } from "react";
-import { Squash as Hamburger } from 'hamburger-react'
-import {Link,NavLink} from "react-router-dom";
+import { Squash as Hamburger } from "hamburger-react";
+import { Link, NavLink } from "react-router-dom";
 
-export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Navb({ isLoggedIn, setIsLoggedIn, user, setUser }) {
+  const [isOpen, setIsOpen] = useState(false); // hamburger menu toggle
   const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUser(null); // clear user info
+  };
 
   return (
     <nav className="bg-white border-b-1 shadow-sm">
-      <div className="md:w-full  mx-auto px-4 md:px-6 sm:px-6 lg:px-8">
+      <div className="md:w-full mx-auto px-4 md:px-6 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          
           {/* Logo */}
-          <div className=" w-20 pl-0 flex-shrink-0 text-lg font-bold">Logo</div>
+          <div className="w-20 pl-0 flex-shrink-0 text-lg font-bold">Logo</div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-6 items-center">
-            <NavLink to="/" href="#" className="hover:text-blue-600">Dashboard</NavLink>
-            <a href="#" className="hover:text-blue-600">Key Management</a>
+            <NavLink to="/" className="hover:text-blue-600">Dashboard</NavLink>
+            <NavLink to="/key-management" href="#" className="hover:text-blue-600">Key Management</NavLink>
 
             {/* Dropdown */}
             <div
@@ -28,9 +32,9 @@ export default function Navbar() {
               <button className="hover:text-blue-600 hover:cursor-pointer">Access</button>
               {dropdownOpen && (
                 <div className="absolute left-[-50px] mt-0 w-45 bg-white shadow-lg rounded-md p-2">
-                  <a href="#" className="block px-4 py-2 hover:text-blue-600 border-b-1 border-b-gray-200 hover:cursor-pointer hover:bg-gray-100">Access Logs</a>
-                  <a href="#" className="block px-4 py-2 hover:text-blue-600 border-b-1 border-b-gray-200 hover:cursor-pointer hover:bg-gray-100">Access Requests</a>
-                  <a href="#" className="block px-4 py-2 hover:text-blue-600 hover:cursor-pointer hover:bg-gray-100">NFC Access</a>
+                  <NavLink to="/access" href="#" className="block px-4 py-2 hover:text-blue-600 border-b border-gray-200 hover:bg-gray-100">Access Logs</NavLink>
+                  <a href="#" className="block px-4 py-2 hover:text-blue-600 border-b border-gray-200 hover:bg-gray-100">Access Requests</a>
+                  <a href="#" className="block px-4 py-2 hover:text-blue-600 hover:bg-gray-100">NFC Access</a>
                 </div>
               )}
             </div>
@@ -40,18 +44,30 @@ export default function Navbar() {
           </div>
 
           {/* Right: Auth buttons */}
-          <div className="hidden md:flex space-x-4">
-            <button className="hover:text-blue-600">Log in</button>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-              Sign up
-            </button>
-          </div>
+          {!isLoggedIn ? (
+            <div className="hidden md:flex space-x-4">
+              <button className="hover:text-blue-600">
+                <NavLink to="/login">Log in</NavLink>
+              </button>
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                Sign up
+              </button>
+            </div>
+          ) : (
+            <div className="hidden md:flex space-x-4 items-center">
+              
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+              >
+                Logout
+              </button>
+            </div>
+          )}
 
           {/* Mobile Hamburger */}
           <div className="md:hidden flex items-center">
-            <button onClick={() => setIsOpen(!isOpen)}>
-             <Hamburger size={24} toggled={isOpen} toggle={setIsOpen} />
-            </button>
+            <Hamburger size={24} toggled={isOpen} toggle={setIsOpen} />
           </div>
         </div>
       </div>
@@ -59,35 +75,52 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden px-4 pb-4 space-y-2">
-          <NavLink to="/" href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Dashboard</NavLink>
-          <a href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Key Management</a>
-          
-          {/* Dropdown (clickable for mobile) */}
+          <NavLink to="/" className="block border-b border-gray-400 hover:text-blue-600">Dashboard</NavLink>
+          <a href="#" className="block border-b border-gray-400 hover:text-blue-600">Key Management</a>
+
+          {/* Mobile Dropdown */}
           <div>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-full border-b-1 border-b-gray-400 text-left hover:text-blue-600"
+              className="w-full border-b border-gray-400 text-left hover:text-blue-600"
             >
               Access
             </button>
             {dropdownOpen && (
               <div className="ml-4 space-y-1">
-                <a href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Access Logs</a>
-                <a href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Access Requests</a>
+                <NavLink to="/access" className="block border-b border-gray-400 hover:text-blue-600">Access Logs</NavLink>
+                <a href="#" className="block border-b border-gray-400 hover:text-blue-600">Access Requests</a>
                 <a href="#" className="block hover:text-blue-600">NFC Access</a>
               </div>
             )}
           </div>
 
-          <NavLink to="/members" href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Members</NavLink>
-          <a href="#" className="block border-b-1 border-b-gray-400 hover:text-blue-600">Settings</a>
+          <NavLink to="/members" className="block border-b border-gray-400 hover:text-blue-600">Members</NavLink>
+          <a href="#" className="block border-b border-gray-400 hover:text-blue-600">Settings</a>
 
-          <div className="pt-2 flex space-x-4">
-            <button className="hover:text-blue-600 border-blue-600 border-2 px-4 py-2 rounded-md">Log in</button>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-              Sign up
-            </button>
-          </div>
+          {/* Mobile Auth Buttons */}
+          {!isLoggedIn ? (
+            <div className="pt-2 flex space-x-4">
+              <Link
+                to="/login"
+                className="hover:text-blue-600 border-blue-600 border-2 px-4 py-2 rounded-md"
+              >
+                Log in
+              </Link>
+              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                Sign up
+              </button>
+            </div>
+          ) : (
+            <div className="pt-2 flex space-x-4">
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 w-full"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       )}
     </nav>

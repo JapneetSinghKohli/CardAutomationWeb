@@ -1,15 +1,19 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom'
-import Navb from './components/Navb'
+import React from "react";
+import { Outlet } from "react-router-dom";
+import Navb from "./components/Navb";
 
-
-function Layout() {
+function Layout({ isLoggedIn, setIsLoggedIn, user, setUser }) {
   return (
     <div>
-      <Navb/>
-        <Outlet/>
+      <Navb
+        isLoggedIn={isLoggedIn}
+        setIsLoggedIn={setIsLoggedIn}
+        user={user}
+        setUser={setUser}
+      />
+      <Outlet />
     </div>
-  )
+  );
 }
 
-export default Layout
+export default Layout;

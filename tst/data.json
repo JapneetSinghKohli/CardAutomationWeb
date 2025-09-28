@@ -79,5 +79,137 @@
             "active": false,
             "Joined": "2021"
         }
-    ]
+    ],
+    "keys": [
+    {
+      "name": "Robotronics",
+      "slot": 1,
+      "description": "Robotics club key",
+      "lastMaintenance": "2025-01-10",
+      "status": "available"
+    },
+    {
+      "name": "KP",
+      "slot": 2,
+      "description": "KP lab key",
+      "lastMaintenance": "2025-01-08",
+      "status": "in_use",
+      "currentUser": "Kartavya",
+      "takenAt": "1 hour ago"
+    },
+    {
+      "name": "E-Cell",
+      "slot": 3,
+      "description": "E-Cell office key",
+      "lastMaintenance": "2025-01-05",
+      "status": "maintenance"
+    },
+    {
+      "name": "E-Cell",
+      "slot": 3,
+      "description": "E-Cell office key",
+      "lastMaintenance": "2025-01-05",
+      "status": "maintenance"
+    },
+    {
+      "name": "E-Cell",
+      "slot": 3,
+      "description": "E-Cell office key",
+      "lastMaintenance": "2025-01-05",
+      "status": "maintenance"
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "today": 0,
+    "taken": 3,
+    "returned": 2,
+    "available": 2,
+    "in_use": 1,
+    "maintenance": 1
+  },
+  "logs": [
+    {
+      "id": 1,
+      "user": "John Smith",
+      "status": "Requested",
+      "location": "Robotronics Club",
+      "method": "Club Card",
+      "timestamp": "2025-01-22T22:15:00",
+      "details": "Meeting",
+      "duration": "3h",
+      "ago": "598d ago"
+    },
+    {
+      "id": 2,
+      "user": "Sarah Wilson",
+      "status": "Taken",
+      "location": "KP",
+      "method": "QR Scan",
+      "timestamp": "2025-01-22T20:00:00",
+      "details": "",
+      "ago": "598d ago"
+    },
+    {
+      "id": 3,
+      "user": "Mike Johnson",
+      "status": "Requested",
+      "location": "Nirmaan",
+      "method": "System",
+      "timestamp": "2025-01-22T17:45:00",
+      "details": "Equipment retrieval for practice",
+      "ago": "598d ago"
+    },
+    {
+      "id": 4,
+      "user": "John Smith",
+      "status": "Taken",
+      "location": "Yantrik",
+      "method": "Club Card",
+      "timestamp": "2025-01-22T19:15:00",
+      "details": "",
+      "ago": "598d ago"
+    },
+    {
+      "id": 5,
+      "user": "Lisa Davis",
+      "status": "Approved",
+      "location": "E-Cell",
+      "method": "QR Scan",
+      "timestamp": "2025-01-22T17:00:00",
+      "details": "",
+      "ago": "598d ago"
+    },
+    {
+      "id": 6,
+      "user": "Alex Brown",
+      "status": "Denied",
+      "location": "SAE",
+      "method": "QR Scan",
+      "timestamp": "2025-01-22T15:30:00",
+      "details": "Insufficient privileges for requested time slot",
+      "ago": "598d ago"
+    },
+    {
+      "id": 7,
+      "user": "Sarah Wilson",
+      "status": "Returned",
+      "location": "SNTC Room",
+      "method": "Club Card",
+      "timestamp": "2025-01-22T14:45:00",
+      "details": "",
+      "ago": "598d ago"
+    },
+    {
+      "id": 8,
+      "user": "john_doe",
+      "status": "Requested",
+      "location": "Robotronics Club",
+      "method": "Club Card",
+      "timestamp": "2025-01-23T10:00:00",
+      "details": "Testing access display",
+      "duration": "1h",
+      "ago": "0d ago"
+    }
+  ]
 }

@@ -1,20 +1,53 @@
-import { useState } from 'react'
-import Navb from './components/Navb'
-import './App.css'
-import Dashboard from './components/dashboard'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import Layout from './Layout';
-
-
+import { useState } from "react";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import Layout from "./Layout";
+import Dashboard from "./components/dashboard";
+import Members from "./components/Members";
+import Login from "./components/Login";
+import Access from "./components/Access";
+import KeyManagement from "./components/KeyManagement";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
-  return (
-    <>
-      <RouterProvider router={router} />
-    </>
-  )
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: (
+        <Layout
+          isLoggedIn={isLoggedIn}
+          setIsLoggedIn={setIsLoggedIn}
+          user={user}
+          setUser={setUser}
+        />
+      ),
+      children: [
+        { path: "", element: <Dashboard /> },
+        { path: "members", element: <Members /> },
+        {
+          path: "login",
+          element: (
+            <Login
+              setIsLoggedIn={setIsLoggedIn}
+              setUser={setUser}
+            />
+          ),
+        },
+        {
+          path: "access",
+          element: <Access user={user} />
+        },
+        {
+          path: "key-management",
+          element: <KeyManagement/>
+        }
+
+      ],
+    },
+  ]);
+
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;

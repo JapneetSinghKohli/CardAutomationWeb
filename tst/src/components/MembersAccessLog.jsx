@@ -27,6 +27,11 @@ export default function MembersAccessLogs() {
   const [selectedLog, setSelectedLog] = useState(null);
   const [showRequestForm, setShowRequestForm] = useState(false);
 
+  // Request form states
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [reason, setReason] = useState("");
+
   // hardcoded current member
   const currentUser = "john_doe";
 
@@ -46,10 +51,39 @@ export default function MembersAccessLogs() {
     (log) => log.user === currentUser && log.status === "Requested"
   );
 
+  // Function to handle request submission (adds to state for testing)
+  const handleSubmitRequest = () => {
+    if (!startTime || !endTime) {
+      alert("Please specify both start and end times.");
+      return;
+    }
+
+    const newLog = {
+      id: data.logs.length + 1,
+      user: currentUser,
+      status: "Requested",
+      location: "Robotronics Club", // or dynamic club if needed
+      method: "Pending",
+      timestamp: new Date().toISOString(),
+      details: reason,
+      startTime,
+      endTime,
+      ago: "0d ago",
+    };
+
+    setData({
+      ...data,
+      logs: [newLog, ...data.logs],
+    });
+
+    // Reset form
+    setStartTime("");
+    setEndTime("");
+    setReason("");
+    setShowRequestForm(false);
+  };
+
   return (
-
-    
-
     <div className="p-6 relative">
       <h1 className="text-2xl font-bold mb-6">Logs</h1>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -70,6 +104,7 @@ export default function MembersAccessLogs() {
           <p className="mt-2 text-2xl font-bold text-green-600">{data.summary.returned}</p>
         </div>
       </div>
+
       {/* Page Title */}
       <h1 className="text-2xl font-bold mb-6">My Access</h1>
 
@@ -88,6 +123,11 @@ export default function MembersAccessLogs() {
                   <p className="text-sm text-gray-500">
                     {log.method} • {new Date(log.timestamp).toLocaleString()}
                   </p>
+                  {log.startTime && log.endTime && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date(log.startTime).toLocaleTimeString()} - {new Date(log.endTime).toLocaleTimeString()}
+                    </p>
+                  )}
                 </div>
                 <span className="ml-4">
                   <StatusBadge status={log.status} />
@@ -110,6 +150,12 @@ export default function MembersAccessLogs() {
                   <p className="text-sm text-gray-500">
                     {log.method} • {new Date(log.timestamp).toLocaleString()}
                   </p>
+                  {log.startTime && log.endTime && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date(log.startTime).toLocaleTimeString()} - {new Date(log.endTime).toLocaleTimeString()}
+                    </p>
+                  )}
+                  {log.details && <p className="text-xs text-gray-400 mt-1">{log.details}</p>}
                 </div>
                 <span className="ml-4">
                   <StatusBadge status={log.status} />
@@ -147,15 +193,22 @@ export default function MembersAccessLogs() {
             >
               <h2 className="text-xl font-bold mb-4">New Access Request</h2>
 
-              {/* Time dropdown */}
-              <label className="block mb-2 text-sm font-medium">Select Time</label>
-              <select className="w-full border rounded-lg p-2 mb-4">
-                <option>09:00 - 10:00</option>
-                <option>10:00 - 11:00</option>
-                <option>11:00 - 12:00</option>
-                <option>14:00 - 15:00</option>
-                <option>15:00 - 16:00</option>
-              </select>
+              {/* Start and End Time */}
+              <label className="block mb-2 text-sm font-medium">Start Time</label>
+              <input
+                type="datetime-local"
+                className="w-full border rounded-lg p-2 mb-4"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+
+              <label className="block mb-2 text-sm font-medium">End Time</label>
+              <input
+                type="datetime-local"
+                className="w-full border rounded-lg p-2 mb-4"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
 
               {/* Reason */}
               <label className="block mb-2 text-sm font-medium">Reason</label>
@@ -163,16 +216,15 @@ export default function MembersAccessLogs() {
                 className="w-full border rounded-lg p-2 mb-4"
                 rows="3"
                 placeholder="Enter reason for access..."
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
               ></textarea>
 
               {/* Actions */}
               <div className="flex gap-4">
                 <button
                   className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-                  onClick={() => {
-                    alert("Request submitted!");
-                    setShowRequestForm(false);
-                  }}
+                  onClick={handleSubmitRequest}
                 >
                   Submit
                 </button>

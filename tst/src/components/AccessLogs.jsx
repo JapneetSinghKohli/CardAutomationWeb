@@ -32,6 +32,9 @@ export default function AccessLogs() {
   const [showAll, setShowAll] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null); // 🔹 for modal
 
+  // 🔹 Hardcoded for now — replace with auth/user prop when available
+  const coordinatorClub = "Robotronics Club";
+
   useEffect(() => {
     fetch("/data.json")
       .then((res) => res.json())
@@ -40,7 +43,15 @@ export default function AccessLogs() {
 
   if (!data) return <p className="p-6">Loading...</p>;
 
-  const filteredLogs = data.logs.filter(
+  // 🔹 First keep only logs for the coordinator's club (based on location)
+  const clubLogs = data.logs.filter(
+    (log) =>
+      log.location &&
+      log.location.toLowerCase().includes(coordinatorClub.toLowerCase())
+  );
+
+  // 🔹 Then apply the existing search filter (so rest of formatting/behavior stays same)
+  const filteredLogs = clubLogs.filter(
     (log) =>
       log.user.toLowerCase().includes(query.toLowerCase()) ||
       log.status.toLowerCase().includes(query.toLowerCase()) ||
@@ -184,4 +195,3 @@ export default function AccessLogs() {
     </div>
   );
 }
-

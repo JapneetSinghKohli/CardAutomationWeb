@@ -22,6 +22,35 @@ function StatusBadge({ status }) {
   );
 }
 
+function TokenReveal({ token }) {
+  const [show, setShow] = React.useState(false);
+
+  return (
+    <div>
+      <button
+        className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+        onClick={() => setShow(!show)}
+      >
+        {show ? "Hide Token" : "Show Token"}
+      </button>
+      <AnimatePresence>
+        {show && (
+          <motion.p
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            className="mt-1 font-mono text-green-700"
+          >
+            {token}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+
+
 export default function MembersAccessLogs() {
   const [data, setData] = useState(null);
   const [selectedLog, setSelectedLog] = useState(null);
@@ -50,6 +79,8 @@ export default function MembersAccessLogs() {
   const requestStatus = data.logs.filter(
     (log) => log.user === currentUser && log.status === "Requested"
   );
+
+  
 
   // Function to handle request submission (adds to state for testing)
   const handleSubmitRequest = () => {
@@ -129,6 +160,13 @@ export default function MembersAccessLogs() {
                     </p>
                   )}
                 </div>
+                  {log.status === "Approved" && log.code && log.user === currentUser && log.method === "Token" && (
+                    <div className="mt-2">
+                      <TokenReveal token={log.code} />
+                    </div>
+                  )}
+
+
                 <span className="ml-4">
                   <StatusBadge status={log.status} />
                 </span>

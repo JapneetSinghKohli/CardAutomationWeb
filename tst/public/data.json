@@ -170,12 +170,13 @@
       "id": 9,
       "user": "john_doe",
       "status": "Approved",
-      "location": "Robotronics Club",
-      "method": "QR Scan",
+      "location": "KP",
+      "method": "Token",
       "timestamp": "2025-01-23T11:30:00",
       "details": "Lab work",
       "ago": "0d ago",
-      "code": "KPR7GH52X9L" 
+      "code": "KPR7GH52X9L"
     }
+
   ]
 }

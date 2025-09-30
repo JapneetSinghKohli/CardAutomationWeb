@@ -9,7 +9,33 @@ def logs_view(request):
     print("Received request:", request.method, request.path)
     if request.method == "GET":
         logs = supabase.table("activities").select("*").order("activity_time", desc=True).execute()
-        return JsonResponse(logs.data, safe=False)
+        
+        # Calculate summary data
+        total = len(logs.data) if logs.data else 0
+        today = 0
+        taken = 0
+        returned = 0
+        
+        from datetime import datetime
+        today_date = datetime.now().date()
+        
+        for log in logs.data:
+            log_date = datetime.fromisoformat(log.get('activity_time', '').replace('Z', '+00:00')).date() if log.get('activity_time') else None
+            if log_date and log_date == today_date:
+                today += 1
+            if log.get('status') == 'Taken':
+                taken += 1
+            if log.get('status') == 'Returned':
+                returned += 1
+        
+        summary = {
+            "total": total,
+            "today": today,
+            "taken": taken,
+            "returned": returned
+        }
+        
+        return JsonResponse({"logs": logs.data, "summary": summary}, safe=False)
     
 
 
@@ -27,13 +53,18 @@ def request_access(request):
             data = json.loads(request.body)
 
             # Required fields
-            required_fields = ["user_id", "key_id", "start_time", "end_time", "reason"]
+            required_fields = ["key_id", "start_time", "end_time", "reason"]
             for field in required_fields:
                 if field not in data:
                     return JsonResponse({"error": f"Missing required field: {field}"}, status=400)
+                    
+            # Set default user_id if not provided
+            if "user_id" not in data or not data["user_id"]:
+                data["user_id"] = "default_user"
 
             # Prepare new log
             new_log = {
+                "user_id": data["user_id"],
                 "key_id": data["key_id"],
                 "status": "Requested",
                 "start_time": data["start_time"],
@@ -67,8 +98,8 @@ def request_access(request):
 def approve_request(request, log_id):
     if request.method == "POST":
         action = json.loads(request.body).get("action")  # "Approved" or "Denied"
-        resp = supabase.table("activities").update({"status": action}).eq("id", log_id).execute()
-        return JsonResponse({"success": True, "data": resp.data[0]})
+        resp = supabase.table("activities").update({"status": action}).eq("activity_id", log_id).execute()
+        return JsonResponse({"success": True, "data": resp.data[0] if resp.data else {"status": action}})
 
 @csrf_exempt
 def members_view(request):

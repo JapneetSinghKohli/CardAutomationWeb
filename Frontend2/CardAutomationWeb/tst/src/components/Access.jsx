@@ -45,7 +45,8 @@ export default function Access({ user }) {
       fetch("http://127.0.0.1:8001/api/logs/")
         .then((res) => res.json())
         .then((json) => {
-          setData({ logs: json }); // Assuming backend returns array of logs directly
+          // Handle the updated data structure with logs and summary
+          setData(json); // Backend now returns {logs: [...], summary: {...}}
         })
         .catch(console.error);
     }, []);
@@ -79,7 +80,9 @@ export default function Access({ user }) {
         if (result.success) {
           setData((prev) => ({
             ...prev,
-            logs: (prev.logs || []).map((l) => (l.activity_id === logId ? result.data : l)),
+            logs: (prev.logs || []).map((l) => 
+              l.activity_id === logId ? {...l, status: action, code: "ROBO1234"} : l
+            ),
           }));
           setSelectedLog(null);
         } else {
@@ -226,13 +229,18 @@ export default function Access({ user }) {
       );
     }
 
-    const currentUser = user.user_id;
-
+    // Debug the user object
+    console.log("User object:", user);
+    
+    // Make sure we have a valid user_id, fallback to a default if not available
+    const currentUser = user?.id || "default_user_id";
+    
     useEffect(() => {
+      console.log("Current user ID being used:", currentUser);
       fetch("http://127.0.0.1:8001/api/logs/")
         .then((res) => res.json())
         .then((json) => {
-          setData({ logs: json });
+          setData(json); // Backend now returns {logs: [...], summary: {...}}
         })
         .catch(console.error);
     }, []);
@@ -255,12 +263,16 @@ export default function Access({ user }) {
 
       const selectedKeyId = 1; // customize your logic here
 
+      // Ensure user_id is included and valid
       const body = {
+        user_id: user?.id || "default_user", // Use direct user.id instead of currentUser
         key_id: selectedKeyId,
         start_time: toISOStringFixed(startTime),
         end_time: toISOStringFixed(endTime),
         reason,
       };
+      
+      console.log("Sending request with body:", body);
 
       try {
         const res = await fetch("http://127.0.0.1:8001/api/request/", {
@@ -326,7 +338,9 @@ export default function Access({ user }) {
                       </p>
                     )}
                   </div>
-                  {log.status === "Approved" && log.code && log.user_id === currentUser && log.action === "Token" && (
+                  {/* <log className="code"></log> */}
+                  {/* log.code = "ROBO1234"; */}
+                  {log.status === "Approved" && log.code && log.user_id === currentUser && (
                     <TokenReveal token={log.code} />
                   )}
                   <span className="ml-4">
@@ -443,5 +457,5 @@ export default function Access({ user }) {
     );
   }
 
-  return user.role === "Coordinator" ? <CoordinatorView /> : <MemberView />;
+  return user.role === "coordinator" ? <CoordinatorView /> : <MemberView />;
 }

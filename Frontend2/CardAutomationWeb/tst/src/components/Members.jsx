@@ -84,18 +84,37 @@ function MemberCard({ member }) {
 
 
 
-function Members() {
+function Members({user}) {
   const [data, setData]=useState(null);
 
-  useEffect(()=>{
-    fetch("/data.json")
-      .then((res)=>res.json())
-      .then((json)=>setData(json));
-  }, [data]);
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!user) return;  // wait until user is logged in
 
-  if (data==null){
+      try {
+        const res = await fetch("http://127.0.0.1:8001/api/members/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,       // from login
+            club_id: user.club_id   // from login
+          }),
+        });
+
+        const members = await res.json();
+        setData(members);
+      } catch (err) {
+        console.error("Error fetching members:", err);
+      }
+    };
+
+    fetchMembers();
+  }, [user]); 
+
+  if (!user || data === null) {
     return <p className="p-4">Loading...</p>;
-  } 
+  }
+
 
 
   return (
@@ -117,26 +136,11 @@ function Members() {
         Lorem, ipsum dolor sit amet consectetur adipisicing elit. Tempora?
       </p>
       <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-2 lg:grid-cols-4" >
-        <SummaryCard
-          title="Total Members"
-          value="40"
-          // txtcolor="text-black"
-        />
-        <SummaryCard
-          title="Active Members"
-          value="40"
-          // txtcolor="text-green-600"
-        />
-        <SummaryCard
-          title="Coordinators"
-          value="40"
-          // txtcolor="text-blue-600"
-        />
-        <SummaryCard
-          title="Mentors"
-          value="40"
-          // txtcolor="text-black"
-        />
+        <SummaryCard title="Total Members" value={data?.length || 0} />
+        <SummaryCard title="Active Members" value={Array.isArray(data) ? data.filter(m => m.active).length : 0} />
+        <SummaryCard title="Coordinators" value={Array.isArray(data) ? data.filter(m => m.role === "Coordinator").length : 0} />
+        <SummaryCard title="Members" value={Array.isArray(data) ? data.filter(m => m.role === "Member").length : 0} />
+
       </div>
       <div className=" flex flex-col md:flex-row items-center md:justify-between mt-2">
         <p className="w-full p-1 pl-4 text-2xl font-bold text-black">
@@ -156,7 +160,7 @@ function Members() {
       </div>
       <div className='w-full px-3 items-center mx-auto '>
         <div className="flex flex-col items-center gap-4 md:grid md:gap-6 md:grid-cols-2 ">
-          {data.robo_club_members.slice(0,4).map((member, index) => (
+          {(Array.isArray(data) ? data : []).slice(0,4).map((member, index) => (
             <MemberCard key={index} member={member} />
         ))}
         </div>

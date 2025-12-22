@@ -1,0 +1,38 @@
+{
+    "robo": [
+    {
+      "id": 1,
+      "name": "User1",
+      "email": "1@example.com",
+      "password": "123456",
+      "role": "coordinator"
+    }
+  ],
+  "kp": [
+    {
+      "id": 1,
+      "name": "User2",
+      "email": "2@example.com",
+      "password": "123456",
+      "role": "member"
+    }
+  ],
+  "dramaClub": [
+    {
+      "id": 2,
+      "name": "User3",
+      "email": "jane@example.com",
+      "password": "password123",
+      "role": "coordinator"
+    }
+  ],
+  "stac": [
+    {
+      "id": 2,
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "password": "password123",
+      "role": "coordinator"
+    }
+  ]
+}

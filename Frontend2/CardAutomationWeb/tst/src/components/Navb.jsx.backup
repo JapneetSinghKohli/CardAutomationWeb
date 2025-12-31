@@ -1,0 +1,125 @@
+import { useState } from "react";
+import { Squash as Hamburger } from "hamburger-react";
+import { Link, NavLink } from "react-router-dom";
+
+export default function Navb({ isLoggedIn, setIsLoggedIn, user, setUser }) {
+  const [isOpen, setIsOpen] = useState(false); // hamburger menu toggle
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUser(null); // clear user info
+  };
+
+  return (
+    <nav className="bg-white border-b-1 shadow-sm">
+      <div className="md:w-full mx-auto px-4 md:px-6 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16 items-center">
+          {/* Logo */}
+          <div className="w-20 pl-0 flex-shrink-0 text-lg font-bold">Logo</div>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex space-x-6 items-center">
+            <NavLink to="/" className="hover:text-blue-600">Dashboard</NavLink>
+            <NavLink to="/key-management" href="#" className="hover:text-blue-600">Key Management</NavLink>
+
+            {/* Dropdown */}
+            <div
+              className="relative py-4" // Added padding to increase hover area
+              onMouseEnter={() => setDropdownOpen(true)}
+              onMouseLeave={() => setDropdownOpen(false)}
+            >
+              <button className="hover:text-blue-600 hover:cursor-pointer">Access</button>
+              {dropdownOpen && (
+                <div className="absolute left-[-50px] top-10 w-45 bg-white shadow-lg rounded-md p-2 z-50">
+                  {/* Increased top to align with padding, added z-index */}
+                  <NavLink to="/access" href="#" className="block px-4 py-2 hover:text-blue-600 border-b border-gray-200 hover:bg-gray-100">Access Logs</NavLink>
+                  <a href="#" className="block px-4 py-2 hover:text-blue-600 border-b border-gray-200 hover:bg-gray-100">Access Requests</a>
+                  <a href="#" className="block px-4 py-2 hover:text-blue-600 hover:bg-gray-100">NFC Access</a>
+                </div>
+              )}
+            </div>
+
+            <NavLink to="/members" className="hover:text-blue-600">Members</NavLink>
+            <a href="#" className="hover:text-blue-600">Settings</a>
+          </div>
+
+          {/* Right: Auth buttons */}
+          {!isLoggedIn ? (
+            <div className="hidden md:flex space-x-4">
+              <button className="hover:text-blue-600">
+                <NavLink to="/login">Log in</NavLink>
+              </button>
+              {/* Signup Removed */}
+            </div>
+          ) : (
+            <div className="hidden md:flex space-x-4 items-center">
+
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+
+          {/* Mobile Hamburger */}
+          <div className="md:hidden flex items-center">
+            <Hamburger size={24} toggled={isOpen} toggle={setIsOpen} />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden px-4 pb-4 space-y-2">
+          <NavLink to="/" className="block border-b border-gray-400 hover:text-blue-600">Dashboard</NavLink>
+          <a href="#" className="block border-b border-gray-400 hover:text-blue-600">Key Management</a>
+
+          {/* Mobile Dropdown */}
+          <div>
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="w-full border-b border-gray-400 text-left hover:text-blue-600"
+            >
+              Access
+            </button>
+            {dropdownOpen && (
+              <div className="ml-4 space-y-1">
+                <NavLink to="/access" className="block border-b border-gray-400 hover:text-blue-600">Access Logs</NavLink>
+                <a href="#" className="block border-b border-gray-400 hover:text-blue-600">Access Requests</a>
+                <a href="#" className="block hover:text-blue-600">NFC Access</a>
+              </div>
+            )}
+          </div>
+
+          <NavLink to="/members" className="block border-b border-gray-400 hover:text-blue-600">Members</NavLink>
+          <a href="#" className="block border-b border-gray-400 hover:text-blue-600">Settings</a>
+
+          {/* Mobile Auth Buttons */}
+          {!isLoggedIn ? (
+            <div className="pt-2 flex space-x-4">
+              <Link
+                to="/login"
+                className="hover:text-blue-600 border-blue-600 border-2 px-4 py-2 rounded-md"
+              >
+                Log in
+              </Link>
+              {/* Signup Removed */}
+            </div>
+          ) : (
+            <div className="pt-2 flex space-x-4">
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 w-full"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </nav>
+  );
+}

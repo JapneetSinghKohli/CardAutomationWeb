@@ -1,0 +1,265 @@
+import React, { useState, useEffect } from "react";
+import {
+  IconKey,
+  IconTrash,
+  IconEdit,
+  IconSearch,
+} from "@tabler/icons-react";
+
+// Status Badge Component
+function StatusBadge({ status }) {
+  const classes = {
+    available: "bg-green-100 text-green-700",
+    in_use: "bg-yellow-100 text-yellow-700",
+    maintenance: "bg-red-100 text-red-700",
+  };
+
+  const labels = {
+    available: "Available",
+    in_use: "In Use",
+    maintenance: "Maintenance",
+  };
+
+  return (
+    <span
+      className={`px-3 py-1 text-sm font-medium rounded-full ${classes[status] || "bg-gray-100 text-gray-700"
+        }`}
+    >
+      {labels[status] || status}
+    </span>
+  );
+}
+
+function KeyCard({ keyItem, user, onAction }) {
+  const userRole = user?.role?.toLowerCase() || "member";
+  const userClubId = user?.club_id;
+  const keyClubId = keyItem.club_id;
+
+  // Permissions Logic
+  const isAdmin = userRole === "admin";
+  const isCoordinator = userRole === "coordinator";
+
+  // Coordinator only for THEIR club
+  const isMyClubKey = keyClubId === userClubId;
+
+  const canEdit = isAdmin || (isCoordinator && isMyClubKey);
+  const canForceReturn = isAdmin || (isCoordinator && isMyClubKey);
+  const canDelete = isAdmin; // Only Admin can delete
+
+  const handleEdit = () => {
+    // Simple toggle logic for MVP functionality
+    let action = "";
+    let confirmMsg = "";
+
+    if (keyItem.status === "maintenance") {
+      action = "available";
+      confirmMsg = "Set key to Available?";
+    } else {
+      action = "maintenance";
+      confirmMsg = "Set key to Maintenance?";
+    }
+
+    if (window.confirm(confirmMsg)) {
+      onAction(keyItem.key_id, action);
+    }
+  };
+
+  return (
+    <div className="relative rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between h-full">
+      <div>
+        {/* Status badge top-right */}
+        <div className="absolute top-3 right-3">
+          <StatusBadge status={keyItem.status} />
+        </div>
+
+        {/* Icon + Title */}
+        <div className="flex items-center gap-3 mb-4">
+          <IconKey className="w-8 h-8 text-gray-400" />
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">{keyItem.club_name}</h3>
+            <p className="text-sm text-gray-500">{keyItem.key_name || keyItem.name || `Key ${keyItem.key_id}`}</p>
+          </div>
+        </div>
+
+        {/* Description if any */}
+        {keyItem.description && (
+          <p className="text-sm text-gray-600 mb-3">{keyItem.description}</p>
+        )}
+
+        {/* Currently With Section (Restored) */}
+        {keyItem.status === "in_use" && (
+          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-100 rounded-lg text-sm">
+            <p className="text-gray-800">
+              <span className="font-semibold">Currently with:</span> {keyItem.current_user_name || "Unknown"}
+            </p>
+            {keyItem.taken_at && (
+              <p className="text-gray-500 text-xs mt-1">Taken at: {new Date(keyItem.taken_at).toLocaleString()}</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="pt-4 mt-2 flex flex-wrap gap-2 justify-end">
+        {keyItem.status === "in_use" && canForceReturn && (
+          <button
+            onClick={() => {
+              if (window.confirm("Force return this key? This will close all active logs for this key."))
+                onAction(keyItem.key_id, "force_return");
+            }}
+            className="px-3 py-1.5 text-sm font-medium rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
+          >
+            Force Return
+          </button>
+        )}
+
+        {canEdit && keyItem.status !== "in_use" && (
+          <button
+            onClick={handleEdit}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md border transition ${keyItem.status === 'maintenance'
+              ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
+              : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+              }`}
+          >
+            {keyItem.status === 'maintenance' ? "Set Available" : "Set Maintenance"}
+          </button>
+        )}
+
+        {canDelete && (
+          <button
+            onClick={() => alert("Delete functionality requires Admin API (Not Implemented)")}
+            className="p-2 text-gray-400 hover:text-red-500 transition"
+            title="Delete Key"
+          >
+            <IconTrash className="h-5 w-5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function KeyManagement({ user }) {
+  const [keys, setKeys] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [error, setError] = useState("");
+
+  const fetchKeys = () => {
+    setLoading(true);
+    fetch("http://127.0.0.1:8001/api/keys/")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.keys) {
+          setKeys(json.keys);
+        } else {
+          setKeys([]);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setError("Failed to load keys");
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchKeys();
+  }, []);
+
+  const handleAction = async (keyId, action) => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8001/api/keys/${keyId}/action/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: action,
+          requester_id: user.id, // Auth check
+          club_id: user.club_id
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        alert("Success!");
+        fetchKeys(); // Refresh
+      } else {
+        alert("Error: " + (result.error || "Unknown error"));
+      }
+    } catch (e) {
+      alert("Network error: " + e.message);
+    }
+  };
+
+  if (loading) return <p className="p-6">Loading Keys...</p>;
+  if (error) return <p className="p-6 text-red-500">{error}</p>;
+
+  // Filter
+  const filteredKeys = keys.filter((k) =>
+    (k.key_name || "").toLowerCase().includes(query.toLowerCase()) ||
+    (k.club_name || "").toLowerCase().includes(query.toLowerCase())
+  );
+
+  // Calculate summary from REAL data
+  const total = keys.length;
+  const available = keys.filter(k => k.status === 'available').length;
+  const in_use = keys.filter(k => k.status === 'in_use').length;
+  const maintenance = keys.filter(k => k.status === 'maintenance').length;
+
+  return (
+    <div className="p-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold mb-2 md:mb-0">Key Management</h1>
+          <p className="text-gray-600">
+            Manage keys. Role: {user?.role || "Guest"}
+          </p>
+        </div>
+
+        <div className="relative mt-3 md:mt-0 w-full md:w-64">
+          <input
+            type="text"
+            placeholder="Search keys..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <IconSearch className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+        </div>
+      </div>
+
+      {/* Summary Section */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="rounded-lg bg-white p-4 shadow-sm border">
+          <h3 className="text-sm font-medium text-gray-600">Total Keys</h3>
+          <p className="mt-2 text-2xl font-bold">{total}</p>
+        </div>
+        <div className="rounded-lg bg-white p-4 shadow-sm border">
+          <h3 className="text-sm font-medium text-gray-600">Available</h3>
+          <p className="mt-2 text-2xl font-bold">{available}</p>
+        </div>
+        <div className="rounded-lg bg-white p-4 shadow-sm border">
+          <h3 className="text-sm font-medium text-gray-600">In Use</h3>
+          <p className="mt-2 text-2xl font-bold">{in_use}</p>
+        </div>
+        <div className="rounded-lg bg-white p-4 shadow-sm border">
+          <h3 className="text-sm font-medium text-gray-600">Maintenance</h3>
+          <p className="mt-2 text-2xl font-bold">{maintenance}</p>
+        </div>
+      </div>
+
+      {/* Keys List */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch auto-rows-fr">
+        {filteredKeys.map((keyItem) => (
+          <KeyCard
+            key={keyItem.key_id}
+            keyItem={keyItem}
+            user={user}
+            onAction={handleAction}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

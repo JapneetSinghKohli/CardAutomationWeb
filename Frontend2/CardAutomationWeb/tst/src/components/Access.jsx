@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { IconSearch } from "@tabler/icons-react";
+import { IconSearch, IconActivity, IconClock, IconArrowUp, IconArrowDown, IconKey, IconShield, IconTrash, IconCalendar } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Access({ user }) {
@@ -22,9 +22,8 @@ export default function Access({ user }) {
 
     return (
       <span
-        className={`px-2 py-1 text-xs font-medium rounded-full ${
-          colors[status] ?? "bg-gray-100 text-gray-600"
-        }`}
+        className={`px-2 py-1 text-xs font-medium rounded-full ${colors[status] ?? "bg-gray-100 text-gray-600"
+          }`}
       >
         {status}
       </span>
@@ -38,8 +37,11 @@ export default function Access({ user }) {
   function CoordinatorView() {
     const [data, setData] = useState({ logs: [] });
     const [query, setQuery] = useState("");
-    const [showAll, setShowAll] = useState(false);
-    const [selectedLog, setSelectedLog] = useState(null);
+    // Pagination State
+    const [visibleCount, setVisibleCount] = useState(6);
+    const handleViewMore = () => setVisibleCount(prev => prev + 6);
+    const handleViewLess = () => setVisibleCount(6);
+
 
     useEffect(() => {
       fetch("http://127.0.0.1:8001/api/logs/")
@@ -53,16 +55,17 @@ export default function Access({ user }) {
 
     if (!data || !data.logs) return <p className="p-6">Loading...</p>;
 
-    const clubLogs = data.logs.filter((log) => log.key_id?.toString() === "1");
-
-    const filteredLogs = clubLogs.filter(
+    // Remove club filter - show ALL logs
+    const filteredLogs = data.logs.filter(
       (log) =>
-        log.user_id?.toLowerCase().includes(query.toLowerCase()) ||
+        log.user_name?.toLowerCase().includes(query.toLowerCase()) ||
+        log.key_name?.toLowerCase().includes(query.toLowerCase()) ||
+        log.club_name?.toLowerCase().includes(query.toLowerCase()) ||
         log.status?.toLowerCase().includes(query.toLowerCase()) ||
-        log.key_id?.toString().includes(query)
+        log.reason?.toLowerCase().includes(query.toLowerCase())
     );
 
-    const logsToShow = showAll ? filteredLogs : filteredLogs.slice(0, 5);
+    const logsToShow = filteredLogs.slice(0, visibleCount);
 
     const handleDecision = async (logId, action) => {
       try {
@@ -80,11 +83,10 @@ export default function Access({ user }) {
         if (result.success) {
           setData((prev) => ({
             ...prev,
-            logs: (prev.logs || []).map((l) => 
-              l.activity_id === logId ? {...l, status: action, code: "ROBO1234"} : l
+            logs: (prev.logs || []).map((l) =>
+              l.activity_id === logId ? { ...l, status: action, code: "ROBO1234" } : l
             ),
           }));
-          setSelectedLog(null);
         } else {
           alert("Failed to update status");
         }
@@ -95,22 +97,62 @@ export default function Access({ user }) {
     };
 
     return (
-      <div className="p-6 relative">
-        <h1 className="text-2xl font-bold mb-6">Logs</h1>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <SummaryCard title="Total Activities" value={data.summary?.total ?? 0} />
-          <SummaryCard title="Today" value={data.summary?.today ?? 0} />
-          <SummaryCard title="Keys Taken" value={data.summary?.taken ?? 0} extraClass="text-red-600" />
-          <SummaryCard title="Keys Returned" value={data.summary?.returned ?? 0} extraClass="text-green-600" />
+      <div className="p-6 relative space-y-6 min-h-screen bg-transparent">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Logs</h1>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-blue-500 to-blue-600 p-6 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/80">Total Activities</p>
+                <p className="mt-3 text-4xl font-bold text-white">{data.summary?.total ?? 0}</p>
+              </div>
+              <div className="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
+                <IconActivity className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-purple-500 to-purple-600 p-6 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/80">Today</p>
+                <p className="mt-3 text-4xl font-bold text-white">{data.summary?.today ?? 0}</p>
+              </div>
+              <div className="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
+                <IconClock className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-red-500 to-red-600 p-6 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/80">Keys Taken</p>
+                <p className="mt-3 text-4xl font-bold text-white">{data.summary?.taken ?? 0}</p>
+              </div>
+              <div className="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
+                <IconArrowUp className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-green-500 to-green-600 p-6 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-white/80">Keys Returned</p>
+                <p className="mt-3 text-4xl font-bold text-white">{data.summary?.returned ?? 0}</p>
+              </div>
+              <div className="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
+                <IconArrowDown className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </div>
         </div>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div className="relative w-full md:w-72">
             <input
               type="text"
-              placeholder="Search logs..."
+              placeholder="Search by name, key, status..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             />
             <IconSearch className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
@@ -119,77 +161,103 @@ export default function Access({ user }) {
           {logsToShow.map((log) => (
             <div
               key={log.activity_id}
-              className={`p-4 rounded-lg border shadow-sm bg-white flex flex-col justify-between h-40 ${
-                log.status === "Requested" ? "cursor-pointer hover:bg-gray-50" : ""
-              }`}
-              onClick={() => log.status === "Requested" && setSelectedLog(log)}
+              className="p-5 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900 hover:shadow-md transition-shadow"
             >
-              <div>
-                <p className="font-semibold text-gray-800 flex items-center gap-2">
-                  <span className="text-sm text-gray-400">ID: {log.user_id}</span>
+              <div className="space-y-3">
+                {/* User Name & Status */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
+                      {(log.user_name || "U")[0].toUpperCase()}
+                    </div>
+                    <span className="font-semibold text-gray-900 dark:text-white">{log.user_name || "Unknown"}</span>
+                  </div>
                   <StatusBadge status={log.status} />
-                  <span className="text-gray-500 font-normal">Key: {log.key_id}</span>
-                </p>
-                <p className="text-sm text-gray-500">
-                  {log.action || "N/A"} • {new Date(log.activity_time).toLocaleString()}
-                </p>
-                {log.reason && <p className="text-xs text-gray-400 mt-1">{log.reason}</p>}
+                </div>
+
+                {/* Key Name */}
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg px-3 py-2 border border-blue-100 dark:border-blue-800">
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-300">{log.key_name || `Key ${log.key_id}`}</p>
+                </div>
+
+                {/* Details Grid */}
+                <div className="space-y-1.5 text-xs">
+                  {log.reason && (
+                    <div className="flex gap-2">
+                      <span className="font-semibold text-gray-600 dark:text-gray-400 min-w-[60px]">Reason:</span>
+                      <span className="text-gray-800 dark:text-gray-200">{log.reason}</span>
+                    </div>
+                  )}
+
+                  {log.start_time && (
+                    <div className="flex gap-2">
+                      <span className="font-semibold text-gray-600 dark:text-gray-400 min-w-[60px]">From:</span>
+                      <span className="text-gray-800 dark:text-gray-200">{new Date(log.start_time).toLocaleString()}</span>
+                    </div>
+                  )}
+
+                  {log.end_time && (
+                    <div className="flex gap-2">
+                      <span className="font-semibold text-gray-600 dark:text-gray-400 min-w-[60px]">To:</span>
+                      <span className="text-gray-800 dark:text-gray-200">{new Date(log.end_time).toLocaleString()}</span>
+                    </div>
+                  )}
+
+                  {(log.status === "Taken" || log.status === "Returned") && (
+                    <div className="flex gap-2">
+                      <span className="font-semibold text-gray-600 dark:text-gray-400 min-w-[60px]">{log.status === "Taken" ? "Taken:" : "Returned:"}</span>
+                      <span className="text-gray-800 dark:text-gray-200">{new Date(log.activity_time).toLocaleString()}</span>
+                    </div>
+                  )}
+
+                  {log.status === "Requested" && (
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDecision(log.activity_id, "Approved");
+                        }}
+                        className="flex-1 bg-green-500 text-white py-2 rounded-lg text-sm font-bold hover:bg-green-600 transition-colors shadow-sm shadow-green-100"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDecision(log.activity_id, "Denied");
+                        }}
+                        className="flex-1 bg-red-500 text-white py-2 rounded-lg text-sm font-bold hover:bg-red-600 transition-colors shadow-sm shadow-red-100"
+                      >
+                        Deny
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))}
         </div>
-        {filteredLogs.length > 5 && (
-          <div className="text-center mt-4">
-            <button onClick={() => setShowAll(!showAll)} className="text-blue-600 font-medium hover:underline">
-              {showAll ? "View Less" : "View More"}
-            </button>
-          </div>
-        )}
-        <AnimatePresence>
-          {selectedLog && (
-            <motion.div
-              className="fixed inset-0 backdrop-blur-1xl bg-opacity-40 flex justify-center items-center z-50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+
+        {/* View More / View Less Buttons */}
+        <div className="flex justify-center gap-4 mt-8 mb-4">
+          {filteredLogs.length > visibleCount && (
+            <button
+              onClick={handleViewMore}
+              className="px-6 py-2 bg-blue-600 rounded-lg text-sm font-semibold text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition-all flex items-center gap-2"
             >
-              <motion.div
-                className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-              >
-                <h2 className="text-xl font-bold mb-4">Access Request</h2>
-                <p className="font-semibold">{selectedLog.user_id}</p>
-                <p className="text-gray-600">Key: {selectedLog.key_id}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  {selectedLog.action || "N/A"} • {new Date(selectedLog.activity_time).toLocaleString()}
-                </p>
-                {selectedLog.reason && <p className="text-gray-500 mt-2">{selectedLog.reason}</p>}
-                <div className="mt-6 flex gap-4">
-                  <button
-                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-                    onClick={() => handleDecision(selectedLog.activity_id, "Approved")}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-                    onClick={() => handleDecision(selectedLog.activity_id, "Denied")}
-                  >
-                    Deny
-                  </button>
-                  <button
-                    className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
-                    onClick={() => setSelectedLog(null)}
-                  >
-                    Close
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
+              View More <span className="text-blue-200 text-xs">({filteredLogs.length - visibleCount} remaining)</span>
+            </button>
           )}
-        </AnimatePresence>
+
+          {visibleCount > 6 && (
+            <button
+              onClick={handleViewLess}
+              className="px-6 py-2 bg-gray-200 dark:bg-gray-800 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-300 dark:hover:bg-gray-700 hover:shadow-md transition-all flex items-center gap-2"
+            >
+              View Less
+            </button>
+          )}
+        </div>
       </div>
     );
   }
@@ -202,50 +270,58 @@ export default function Access({ user }) {
     const [endTime, setEndTime] = useState("");
     const [reason, setReason] = useState("");
 
+    // Pagination State
+    const [historyCount, setHistoryCount] = useState(5);
+    const [requestsCount, setRequestsCount] = useState(5);
+
     function TokenReveal({ token }) {
       const [show, setShow] = useState(false);
 
       return (
-        <div>
+        <div className="flex flex-col items-end">
           <button
-            className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all shadow-sm flex items-center gap-2 ${show
+              ? "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+              : "bg-green-600 text-white hover:bg-green-700 shadow-green-100 dark:shadow-none"
+              }`}
             onClick={() => setShow(!show)}
           >
             {show ? "Hide Token" : "Show Token"}
           </button>
           <AnimatePresence>
             {show && (
-              <motion.p
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                className="mt-1 font-mono text-green-700"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="mt-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-4 py-2 rounded-xl"
               >
-                {token}
-              </motion.p>
+                <p className="font-mono text-xl font-bold text-green-700 dark:text-green-400 tracking-widest text-center">
+                  {token}
+                </p>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
       );
     }
 
-    // Debug the user object
-    console.log("User object:", user);
-    
-    // Make sure we have a valid user_id, fallback to a default if not available
     const currentUser = user?.id || "default_user_id";
-    
+
     useEffect(() => {
-      console.log("Current user ID being used:", currentUser);
       fetch("http://127.0.0.1:8001/api/logs/")
         .then((res) => res.json())
         .then((json) => {
-          setData(json); // Backend now returns {logs: [...], summary: {...}}
+          setData(json);
         })
         .catch(console.error);
     }, []);
 
-    if (!data || !data.logs) return <p className="p-6">Loading...</p>;
+    if (!data || !data.logs) return (
+      <div className="flex items-center justify-center p-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+      </div>
+    );
 
     const accessHistory = (data.logs ?? []).filter(
       (log) => log.user_id === currentUser && log.status !== "Requested"
@@ -261,18 +337,13 @@ export default function Access({ user }) {
         return;
       }
 
-      const selectedKeyId = 1; // customize your logic here
-
-      // Ensure user_id is included and valid
       const body = {
-        user_id: user?.id || "default_user", // Use direct user.id instead of currentUser
-        key_id: selectedKeyId,
+        user_id: user?.id,
+        key_id: 1,
         start_time: toISOStringFixed(startTime),
         end_time: toISOStringFixed(endTime),
         reason,
       };
-      
-      console.log("Sending request with body:", body);
 
       try {
         const res = await fetch("http://127.0.0.1:8001/api/request/", {
@@ -283,12 +354,11 @@ export default function Access({ user }) {
 
         if (!res.ok) {
           const errorData = await res.json();
-          alert("Failed to submit request: " + (errorData.error || res.statusText));
+          alert("Failed: " + (errorData.error || res.statusText));
           return;
         }
 
         const result = await res.json();
-
         if (result.success) {
           setData((prev) => ({
             ...prev,
@@ -298,145 +368,267 @@ export default function Access({ user }) {
           setStartTime("");
           setEndTime("");
           setReason("");
-        } else {
-          alert("Failed to submit request: " + (result.error || "Unknown error"));
         }
       } catch (error) {
-        console.error("Submit request error:", error);
-        alert("Failed to submit request: Network error?");
+        alert("Network error?");
       }
     };
 
     return (
-      <div className="p-6 relative">
-        <h1 className="text-2xl font-bold mb-6">Logs</h1>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <SummaryCard title="Total Activities" value={data.summary?.total ?? 0} />
-          <SummaryCard title="Today" value={data.summary?.today ?? 0} />
-          <SummaryCard title="Keys Taken" value={data.summary?.taken ?? 0} extraClass="text-red-600" />
-          <SummaryCard title="Keys Returned" value={data.summary?.returned ?? 0} extraClass="text-green-600" />
-        </div>
-
-        <h1 className="text-2xl font-bold mb-6">My Access</h1>
-
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1 bg-white rounded-lg shadow-sm border divide-y">
-            <h2 className="p-4 font-semibold text-gray-800 border-b">Access History</h2>
-            {accessHistory.length === 0 ? (
-              <p className="p-4 text-gray-500">No history found</p>
-            ) : (
-              accessHistory.map((log) => (
-                <div key={log.activity_id} className="p-4 flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-gray-800">{log.key_id}</p>
-                    <p className="text-sm text-gray-500">
-                      {log.action || "N/A"} • {new Date(log.activity_time).toLocaleString()}
-                    </p>
-                    {log.start_time && log.end_time && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        {new Date(log.start_time).toLocaleTimeString()} - {new Date(log.end_time).toLocaleTimeString()}
-                      </p>
-                    )}
-                  </div>
-                  {/* <log className="code"></log> */}
-                  {/* log.code = "ROBO1234"; */}
-                  {log.status === "Approved" && log.code && log.user_id === currentUser && (
-                    <TokenReveal token={log.code} />
-                  )}
-                  <span className="ml-4">
-                    <StatusBadge status={log.status} />
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-
-          <div className="flex-1 bg-white rounded-lg shadow-sm border divide-y">
-            <h2 className="p-4 font-semibold text-gray-800 border-b">Request Status</h2>
-            {requestStatus.length === 0 ? (
-              <p className="p-4 text-gray-500">No requests found</p>
-            ) : (
-              requestStatus.map((log) => (
-                <div key={log.activity_id} className="p-4 flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-gray-800">{log.key_id}</p>
-                    <p className="text-sm text-gray-500">
-                      {log.action || "N/A"} • {new Date(log.activity_time).toLocaleString()}
-                    </p>
-                    {log.start_time && log.end_time && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        {new Date(log.start_time).toLocaleTimeString()} - {new Date(log.end_time).toLocaleTimeString()}
-                      </p>
-                    )}
-                    {log.reason && <p className="text-xs text-gray-400 mt-1">{log.reason}</p>}
-                  </div>
-                  <span className="ml-4">
-                    <StatusBadge status={log.status} />
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="mt-6 text-center">
+      <div className="p-6 relative space-y-8 min-h-screen bg-transparent transition-colors duration-300">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Logs</h1>
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all flex items-center gap-2"
             onClick={() => setShowRequestForm(true)}
           >
             File Access Request
           </button>
         </div>
 
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-blue-500 to-blue-600 p-6 shadow-lg">
+            <div className="flex items-start justify-between text-white">
+              <div>
+                <p className="text-sm font-medium opacity-80">Total Activities</p>
+                <p className="mt-3 text-4xl font-bold">{data.summary?.total ?? 0}</p>
+              </div>
+              <IconActivity className="h-6 w-6 opacity-60" />
+            </div>
+          </div>
+          {/* ... Other Stat Cards follow same pattern ... */}
+          <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-purple-500 to-purple-600 p-6 shadow-lg">
+            <div className="flex items-start justify-between text-white">
+              <div>
+                <p className="text-sm font-medium opacity-80">Today</p>
+                <p className="mt-3 text-4xl font-bold">{data.summary?.today ?? 0}</p>
+              </div>
+              <IconClock className="h-6 w-6 opacity-60" />
+            </div>
+          </div>
+          <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-red-500 to-red-600 p-6 shadow-lg">
+            <div className="flex items-start justify-between text-white">
+              <div>
+                <p className="text-sm font-medium opacity-80">Keys Taken</p>
+                <p className="mt-3 text-4xl font-bold">{data.summary?.taken ?? 0}</p>
+              </div>
+              <IconArrowUp className="h-6 w-6 opacity-60" />
+            </div>
+          </div>
+          <div className="rounded-xl border border-gray-100 bg-gradient-to-br from-green-500 to-green-600 p-6 shadow-lg">
+            <div className="flex items-start justify-between text-white">
+              <div>
+                <p className="text-sm font-medium opacity-80">Keys Returned</p>
+                <p className="mt-3 text-4xl font-bold">{data.summary?.returned ?? 0}</p>
+              </div>
+              <IconArrowDown className="h-6 w-6 opacity-60" />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Access History */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white border-b dark:border-gray-800 pb-2">Access History</h2>
+            <div className="space-y-4">
+              {accessHistory.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
+                  <p className="text-gray-500 dark:text-gray-400">No history found</p>
+                </div>
+              ) : (
+                accessHistory.slice(0, historyCount).map((log) => (
+                  <div key={log.activity_id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start">
+                      <div className="flex gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                          <IconKey className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 dark:text-white text-lg">{log.key_name || `Key ${log.key_id}`}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                            <IconShield className="h-4 w-4" /> {log.club_name || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                      <StatusBadge status={log.status} />
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800 grid grid-cols-2 gap-4">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="flex items-center gap-1"><IconCalendar className="h-3 w-3" /> Date</p>
+                        <p className="font-semibold text-gray-700 dark:text-gray-300 mt-0.5">{new Date(log.activity_time).toLocaleDateString()}</p>
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="flex items-center gap-1"><IconClock className="h-3 w-3" /> Time</p>
+                        <p className="font-semibold text-gray-700 dark:text-gray-300 mt-0.5">{new Date(log.activity_time).toLocaleTimeString()}</p>
+                      </div>
+                    </div>
+
+                    {log.status === "Approved" && log.code && (
+                      <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800 flex justify-end">
+                        <TokenReveal token={log.code} />
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex justify-center gap-3">
+              {accessHistory.length > historyCount && (
+                <button
+                  onClick={() => setHistoryCount(prev => prev + 5)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-blue-100 shadow-lg hover:bg-blue-700"
+                >
+                  View More
+                </button>
+              )}
+              {historyCount > 5 && (
+                <button
+                  onClick={() => setHistoryCount(5)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-300"
+                >
+                  View Less
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Request Status */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white border-b dark:border-gray-800 pb-2">Request Status</h2>
+            <div className="space-y-4">
+              {requestStatus.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">
+                  <p className="text-gray-500 dark:text-gray-400">No active requests</p>
+                </div>
+              ) : (
+                requestStatus.slice(0, requestsCount).map((log) => (
+                  <div key={log.activity_id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start">
+                      <div className="flex gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                          <IconClock className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 dark:text-white text-lg">{log.key_name || `Key ${log.key_id}`}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{log.club_name || "N/A"}</p>
+                        </div>
+                      </div>
+                      <StatusBadge status={log.status} />
+                    </div>
+
+                    {log.reason && (
+                      <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-xs italic text-gray-600 dark:text-gray-400">
+                        "{log.reason}"
+                      </div>
+                    )}
+
+                    <div className="mt-4 grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <p className="text-gray-500 dark:text-gray-400">From</p>
+                        <p className="font-semibold text-gray-700 dark:text-gray-300">{new Date(log.start_time).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 dark:text-gray-400">To</p>
+                        <p className="font-semibold text-gray-700 dark:text-gray-300">{new Date(log.end_time).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex justify-center gap-3">
+              {requestStatus.length > requestsCount && (
+                <button
+                  onClick={() => setRequestsCount(prev => prev + 5)}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-bold shadow-purple-100 shadow-lg hover:bg-purple-700"
+                >
+                  View More
+                </button>
+              )}
+              {requestsCount > 5 && (
+                <button
+                  onClick={() => setRequestsCount(5)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-300"
+                >
+                  View Less
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Request Modal */}
         <AnimatePresence>
           {showRequestForm && (
             <motion.div
-              className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
               <motion.div
-                className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
+                className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-lg border border-gray-100"
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
               >
-                <h2 className="text-xl font-bold mb-4">New Access Request</h2>
-                <label className="block mb-2 text-sm font-medium">Start Time</label>
-                <input
-                  type="datetime-local"
-                  className="w-full border rounded-lg p-2 mb-4"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                />
-                <label className="block mb-2 text-sm font-medium">End Time</label>
-                <input
-                  type="datetime-local"
-                  className="w-full border rounded-lg p-2 mb-4"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                />
-                <label className="block mb-2 text-sm font-medium">Reason</label>
-                <textarea
-                  className="w-full border rounded-lg p-2 mb-4"
-                  rows="3"
-                  placeholder="Enter reason for access..."
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                ></textarea>
-                <div className="flex gap-4">
+                <div className="flex justify-between items-center mb-8">
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Request Key Access
+                  </h2>
+                  <button onClick={() => setShowRequestForm(false)} className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all">
+                    ✕
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                        <IconCalendar className="h-4 w-4 text-blue-500" /> Start Time
+                      </label>
+                      <input
+                        type="datetime-local"
+                        className="w-full border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 rounded-2xl p-3 text-gray-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                        <IconClock className="h-4 w-4 text-purple-500" /> End Time
+                      </label>
+                      <input
+                        type="datetime-local"
+                        className="w-full border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 rounded-2xl p-3 text-gray-900 dark:text-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 outline-none transition-all"
+                        value={endTime}
+                        onChange={(e) => setEndTime(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Reason for Access</label>
+                    <textarea
+                      className="w-full border-2 border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 rounded-2xl p-4 text-gray-900 dark:text-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all resize-none"
+                      rows="4"
+                      placeholder="e.g., Equipment testing for project X..."
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-8 pt-6 border-t border-gray-50 dark:border-gray-800">
                   <button
-                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-4 rounded-2xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all shadow-xl shadow-blue-100 dark:shadow-none"
                     onClick={handleSubmitRequest}
                   >
-                    Submit
-                  </button>
-                  <button
-                    className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
-                    onClick={() => setShowRequestForm(false)}
-                  >
-                    Cancel
+                    Send Request
                   </button>
                 </div>
               </motion.div>
@@ -457,5 +649,5 @@ export default function Access({ user }) {
     );
   }
 
-  return user.role === "coordinator" ? <CoordinatorView /> : <MemberView />;
+  return user?.role?.toLowerCase() === "coordinator" ? <CoordinatorView /> : <MemberView />;
 }
